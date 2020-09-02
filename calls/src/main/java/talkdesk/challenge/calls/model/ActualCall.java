@@ -1,9 +1,5 @@
 package talkdesk.challenge.calls.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.Nulls;
-
-import java.sql.Timestamp;
 import java.time.Instant;
 
 /**
@@ -11,7 +7,7 @@ import java.time.Instant;
  *
  */
 
-public class Calls {
+public class ActualCall {
 
     /**
      * The phone number of the caller
@@ -44,14 +40,7 @@ public class Calls {
      * @param calleeNumber number of the callee
      * @param callType type of the call
      */
-    public Calls(String callerNumber, String calleeNumber, String callType){
-        if (callerNumber == null)
-            throw new IllegalArgumentException("Caller number should not be null");
-        if (calleeNumber == null)
-            throw new IllegalArgumentException("Callee number should not be null");
-        if (callType == null)
-            throw new IllegalArgumentException("Type of call should not be null");
-
+    public ActualCall(String callerNumber, String calleeNumber, String callType){
         this.callerNumber = callerNumber;
         this.calleeNumber = calleeNumber;
         this.startTime = Instant.now();

@@ -1,13 +1,15 @@
 package talkdesk.challenge.calls.service;
 
 import talkdesk.challenge.calls.model.Call;
-import talkdesk.challenge.calls.model.Calls;
+import talkdesk.challenge.calls.model.ActualCall;
 
 import java.util.List;
 
 public interface ICallService {
 
-    void createCalls(Calls calls);
+    void createCalls(ActualCall calls);
 
-    public List<Call> listCalls();
+    List<ActualCall> activeCalls();
+
+    void endCall(String callerNumber);
 }

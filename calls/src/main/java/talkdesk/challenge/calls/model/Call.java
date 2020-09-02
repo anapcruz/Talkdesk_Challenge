@@ -3,6 +3,7 @@ package talkdesk.challenge.calls.model;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 /**
  * Call class
@@ -11,14 +12,6 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "CALLS")
 public class Call implements Serializable {
-
-    /**
-     * Types of the call
-     */
-    private enum callType{
-        INBOUND,
-        OUTBOUND
-    }
 
     /**
      * primary key of call
@@ -40,17 +33,17 @@ public class Call implements Serializable {
     /**
      * start timestamp of the call
      */
-    private Timestamp startTime;
+    private Instant startTime;
 
     /**
      * end timestamp of the call
      */
-    private Timestamp endTime;
+    private Instant endTime;
 
     /**
      * type of the call
      */
-    private callType type;
+    private String type;
 
     /**
      * Call constructor
@@ -60,7 +53,7 @@ public class Call implements Serializable {
      * @param endTime end timestamp of the call
      * @param type type of the call
      */
-    public Call(String callerNumber, String calleeNumber, Timestamp startTime, Timestamp endTime, callType type) {
+    public Call(String callerNumber, String calleeNumber, Instant startTime, Instant endTime, String type) {
         this.callerNumber = callerNumber;
         this.calleeNumber = calleeNumber;
         this.startTime = startTime;
@@ -88,7 +81,7 @@ public class Call implements Serializable {
      * Returns start timestamp of the call
      * @return start timestamp of the call
      */
-    public Timestamp getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
@@ -96,7 +89,7 @@ public class Call implements Serializable {
      * Returns end timestamp of the call
      * @return end timestamp of the call
      */
-    public Timestamp getEndTime() {
+    public Instant getEndTime() {
         return endTime;
     }
 
@@ -104,7 +97,7 @@ public class Call implements Serializable {
      * Returns the type of the call
      * @return type of the  call
      */
-    public callType getType() {
+    public String getType() {
         return type;
     }
 
