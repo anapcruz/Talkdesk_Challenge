@@ -12,9 +12,4 @@ import java.util.List;
  */
 @RepositoryRestResource
 public interface CallRepository extends JpaRepository<Call, Long> {
-
-    List<Call> findByCallStatus(String callStatus);
-
-    List<Call> findByCallerNumberAndCalleeNumber(String callerNumber, String calleeNumber);
-
 }

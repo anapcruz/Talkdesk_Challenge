@@ -1,28 +1,24 @@
 package talkdesk.challenge.calls.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import talkdesk.challenge.calls.model.Call;
+import talkdesk.challenge.calls.model.Calls;
 import talkdesk.challenge.calls.service.CallService;
+import talkdesk.challenge.calls.service.ICallService;
 
 @RestController
-@RequestMapping(value = "api")
 public class CallController {
 
-    private CallService callService;
+    @Autowired
+    private ICallService callService;
 
-    public CallController(CallService callService) {
-        this.callService = callService;
-    }
-
-    @PostMapping("/createCall")
-    public void createCall(@RequestBody Call call){
-
-
-
-        //store information into database
-        //callService.createCall(call);
+    @PostMapping(value="/createCall", consumes = "application/json")
+    public void createCall(@RequestBody Calls calls){
+        callService.createCalls(calls);
     }
 }

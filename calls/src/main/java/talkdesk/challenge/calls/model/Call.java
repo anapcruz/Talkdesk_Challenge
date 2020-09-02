@@ -9,7 +9,7 @@ import java.sql.Timestamp;
  * All the information related to a call will be save into a database
  */
 @Entity
-@Table(name = "CALL")
+@Table(name = "CALLS")
 public class Call implements Serializable {
 
     /**
