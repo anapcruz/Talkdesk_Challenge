@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface ICallService {
 
-    void createCalls(ActualCall calls);
+    public void setCallStatus(Call call);
+
+    void createCalls(Call calls);
 
     List<ActualCall> activeCalls();
 

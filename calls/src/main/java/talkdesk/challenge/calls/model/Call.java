@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "CALLS")
-public class Call implements Serializable {
+public class Call {
 
     /**
      * primary key of call
@@ -45,6 +45,8 @@ public class Call implements Serializable {
      */
     private String type;
 
+    private String status;
+
     /**
      * Call constructor
      * @param callerNumber the phone number of the caller
@@ -59,6 +61,22 @@ public class Call implements Serializable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.type = type;
+    }
+
+    public Call(String callerNumber, String calleeNumber, String type){
+        this.callerNumber = callerNumber;
+        this.calleeNumber = calleeNumber;
+        this.startTime = Instant.now();
+        this.type = type;
+        this.status = "IN_CALL";
+    }
+
+    public Call() {
+
+    }
+
+    public long getId() {
+        return id;
     }
 
     /**
@@ -85,6 +103,10 @@ public class Call implements Serializable {
         return startTime;
     }
 
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+    }
+
     /**
      * Returns end timestamp of the call
      * @return end timestamp of the call
@@ -101,4 +123,11 @@ public class Call implements Serializable {
         return type;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

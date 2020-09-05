@@ -1,0 +1,3 @@
+yarn add bootstrap
+npm install --save reactstrap react react-dom
+npm install react-router-dom

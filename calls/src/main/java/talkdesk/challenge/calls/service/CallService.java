@@ -21,47 +21,44 @@ public class CallService implements ICallService{
 
     public CallService(CallRepository callRepository) { this.callRepository = callRepository; }
 
+
     /**
      * When a new call is created, this function is called to save this call in a list
      * This list stores all current calls, i.e., calls with the status equals "IN_CALL"
      * @param calls new call
      */
-    public void createCalls(ActualCall calls){
+    public void createCalls(Call calls){
         //verify if any parameter is empty
         if (calls.getCallerNumber().equals(""))
             throw new IllegalArgumentException("Caller number should not be empty");
         if (calls.getCalleeNumber().equals(""))
             throw new IllegalArgumentException("Callee number should not be empty");
-        if (calls.getCallType().equals(""))
+        if (calls.getType().equals(""))
             throw new IllegalArgumentException("Call type should not be empty");
         if (calls.getCallerNumber().equals(calls.getCalleeNumber()))
             throw new IllegalArgumentException("Caller number should be different to callee number");
 
-        for (ActualCall c:  currentCalls){
-            if(c.getCallerNumber().equals(calls.getCallerNumber()) && c.getCallStatus().equals("IN_CALL"))
+        List<Call> cal = callRepository.findAll();
+        //check if caller or callee number exists in the list with the status "IN_CALL"
+        //in case of true an exception is triggered
+        for (Call c:  cal){
+            if(c.getCallerNumber().equals(calls.getCallerNumber()) && c.getStatus().equals("IN_CALL"))
                 throw new IllegalArgumentException("Caller number " + calls.getCallerNumber() + " is in call!");
 
-            else if(c.getCalleeNumber().equals(calls.getCalleeNumber()) && c.getCallStatus().equals("IN_CALL"))
+            else if(c.getCalleeNumber().equals(calls.getCalleeNumber()) && c.getStatus().equals("IN_CALL"))
                 throw new IllegalArgumentException("Callee number " + calls.getCalleeNumber() + " is in call!");
         }
-        this.currentCalls.add(calls);
+        //setCallStatus(calls);
+        callRepository.save(calls);
+    }
 
-        //check if caller or callee number are in call
-        //in case of true, they should not be added to the list
-        /**Iterator<Calls> iterator = currentCalls.iterator();
-        while(iterator.hasNext()){
-            if(iterator.equals(calls.getCallerNumber())  && iterator.equals(calls))
-                throw new IllegalArgumentException("Caller number " + calls.getCallerNumber() + " is in call!");
-            else if(iterator.equals(calls.getCalleeNumber()))
-                throw new IllegalArgumentException("Callee number " + calls.getCalleeNumber() + " is in call!");
-            else if(iterator.equals(calls.getCallerNumber()))
-            else{
-                //add call to the current call list
-                this.currentCalls.add(calls);
-            }
-            iterator.next();
-        }*/
-
+    /**
+     * Set status of the call
+     * @param call current call
+     */
+    public void setCallStatus(Call call){
+        call.setStartTime(Instant.now());
+        call.setStatus("IN_CALL");
     }
 
     /**
@@ -69,8 +66,7 @@ public class CallService implements ICallService{
      * @return list of calls
      */
     public List<ActualCall> activeCalls(){
-        List<ActualCall> activeCalls = new ArrayList<>(currentCalls);
-        return activeCalls;
+        return new ArrayList<>(currentCalls);
     }
 
     /**
