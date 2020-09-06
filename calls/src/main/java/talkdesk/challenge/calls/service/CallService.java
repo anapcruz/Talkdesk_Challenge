@@ -48,7 +48,7 @@ public class CallService implements ICallService{
             else if(c.getCalleeNumber().equals(calls.getCalleeNumber()) && c.getStatus().equals("IN_CALL"))
                 throw new IllegalArgumentException("Callee number " + calls.getCalleeNumber() + " is in call!");
         }
-        //setCallStatus(calls);
+        setCallStatus(calls);
         callRepository.save(calls);
     }
 
