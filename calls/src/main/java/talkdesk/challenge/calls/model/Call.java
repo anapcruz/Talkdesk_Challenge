@@ -1,18 +1,13 @@
 package talkdesk.challenge.calls.model;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.sql.Timestamp;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-/**
- * Call class
- * All the information related to a call will be save into a database
- */
 @Entity
-@Table(name = "CALLS")
+@Table(name = "CALL")
 public class Call {
-
     /**
      * primary key of call
      */
@@ -23,11 +18,13 @@ public class Call {
     /**
      * the phone number of the caller
      */
+    @NotEmpty(message = "Caller number not be empty")
     private String callerNumber;
 
     /**
      * the phone number of the callee
      */
+    @NotEmpty(message = "Callee number not be empty")
     private String calleeNumber;
 
     /**
@@ -47,58 +44,30 @@ public class Call {
 
     private String status;
 
-    /**
-     * Call constructor
-     * @param callerNumber the phone number of the caller
-     * @param calleeNumber the phone number of the callee
-     * @param startTime start timestamp of the call
-     * @param endTime end timestamp of the call
-     * @param type type of the call
-     */
-    public Call(String callerNumber, String calleeNumber, Instant startTime, Instant endTime, String type) {
-        this.callerNumber = callerNumber;
-        this.calleeNumber = calleeNumber;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.type = type;
-    }
-
-    public Call(String callerNumber, String calleeNumber, String type){
-        this.callerNumber = callerNumber;
-        this.calleeNumber = calleeNumber;
-        this.startTime = Instant.now();
-        this.type = type;
-        this.status = "IN_CALL";
-    }
-
-    public Call() {
-
-    }
-
     public long getId() {
         return id;
     }
 
-    /**
-     * Returns the phone number of the caller
-     * @return  phone number of the caller
-     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public String getCallerNumber() {
         return callerNumber;
     }
 
-    /**
-     * Returns the phone number of the callee
-     * @return phone number of the callee
-     */
+    public void setCallerNumber(String callerNumber) {
+        this.callerNumber = callerNumber;
+    }
+
     public String getCalleeNumber() {
         return calleeNumber;
     }
 
-    /**
-     * Returns start timestamp of the call
-     * @return start timestamp of the call
-     */
+    public void setCalleeNumber(String calleeNumber) {
+        this.calleeNumber = calleeNumber;
+    }
+
     public Instant getStartTime() {
         return startTime;
     }
@@ -107,20 +76,20 @@ public class Call {
         this.startTime = startTime;
     }
 
-    /**
-     * Returns end timestamp of the call
-     * @return end timestamp of the call
-     */
     public Instant getEndTime() {
         return endTime;
     }
 
-    /**
-     * Returns the type of the call
-     * @return type of the  call
-     */
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
+    }
+
     public String getType() {
         return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStatus() {

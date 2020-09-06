@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Call</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+<body>
+    <div class="container">
+        <div th:replace="fragments :: menu"></div>
+        <h1> Call</h1>
+        <hr>
+        <h2>New Call</h2>
+
+        <form action="#" th:action="@{/saveCall}" th:object="${call}" method="POST">
+
+            <div>
+                <td>Callee number:</td>
+                <td><input type="text" th:field="*{callerNumber}" placeholder="Caller number"></td>
+                <td th:if="${#fields.hasErrors('callerNumber')}" th:errors="*{callerNumber}">Name Error</td>
+            </div>
+            <br/>
+            <div>
+                <td>Callee number:</td>
+                <td><input type="text" th:field="*{calleeNumber}" placeholder="Callee number"></td>
+                <td th:if="${#fields.hasErrors('calleeNumber')}" th:errors="*{calleeNumber}">Name Error</td>
+            </div>
+            <br/>
+            <label class="col-form-label">Call type:</label>
+            <select th:field="*{type}">
+                <option th:value="INBOUND" th:text="Inbound"></option>
+                <option th:value="OUTBOUND" th:text="Outbound"></option>
+            </select>
+            <button type="submit" class="btn btn-info col-2">Save Call</button>
+
+        </form>
+    </div>
+
+</body>
+</html>

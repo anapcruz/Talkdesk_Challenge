@@ -1,34 +1,35 @@
 package talkdesk.challenge.calls.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import talkdesk.challenge.calls.model.Call;
-import talkdesk.challenge.calls.model.ActualCall;
 import talkdesk.challenge.calls.repository.CallRepository;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-public class CallService implements ICallService{
+public class CallService implements CallInterface {
 
+    @Autowired
+    private CallRepository callRepository;
 
-    private final CallRepository callRepository;
+    @Override
+    public List<Call> getAllOngoingCalls() {
+        return callRepository.findCallByStatus("IN_CALL");
+    }
 
-    /**
-     * List of current calls
-     */
-    LinkedList<ActualCall> currentCalls = new LinkedList<>();
+    @Override
+    public List<Call> getAllCalls() {
+        return callRepository.findAll();
+    }
 
-    public CallService(CallRepository callRepository) { this.callRepository = callRepository; }
-
-
-    /**
-     * When a new call is created, this function is called to save this call in a list
-     * This list stores all current calls, i.e., calls with the status equals "IN_CALL"
-     * @param calls new call
-     */
-    public void createCalls(Call calls){
-        //verify if any parameter is empty
+    @Override
+    public void saveCall(Call calls) {
         if (calls.getCallerNumber().equals(""))
             throw new IllegalArgumentException("Caller number should not be empty");
         if (calls.getCalleeNumber().equals(""))
@@ -49,51 +50,42 @@ public class CallService implements ICallService{
                 throw new IllegalArgumentException("Callee number " + calls.getCalleeNumber() + " is in call!");
         }
         setCallStatus(calls);
-        callRepository.save(calls);
+        this.callRepository.save(calls);
     }
 
-    /**
-     * Set status of the call
-     * @param call current call
-     */
-    public void setCallStatus(Call call){
-        call.setStartTime(Instant.now());
-        call.setStatus("IN_CALL");
-    }
+    @Override
+    public void endCallById(long id) {
+        Optional<Call> optional = callRepository.findById(id);
+        Call call;
 
-    /**
-     * Return a list of the active calls
-     * @return list of calls
-     */
-    public List<ActualCall> activeCalls(){
-        return new ArrayList<>(currentCalls);
-    }
-
-    /**
-     * Function called when a call is finished, i.e., the call status change to "END_CALL"
-     * @param callerNumber phone number of the caller
-     */
-    public void endCall(String callerNumber){
-        for (ActualCall c:  currentCalls){
-            if(c.getCallerNumber().equals(callerNumber)){
-                //mudar para exceções
-                c.setCallStatus("END_CALL");
-                saveCall(c, Instant.now());
-            }
-            else
-                throw new IllegalArgumentException("The caller number " + callerNumber + " does not exist!");
+        if(optional.isPresent()){
+            call = optional.get();
+        }else{
+            throw  new RuntimeException("Call id not found for id :: " + id);
         }
+
+        endCallStatus(call);
+        this.callRepository.save(call);
     }
 
-    /**
-     * Function called when connection is finished. After that, the call will be stored into the database
-     * @param calls call finished
-     * @param endTime end timestamp of the call
-     */
-    private void saveCall(ActualCall calls, Instant endTime){
-        Call c = new Call(calls.getCallerNumber(), calls.getCalleeNumber(), calls.getStartTime(), endTime, calls.getCallType());
-        //store into database
-        callRepository.save(c);
+    @Override
+    public void deleteCallByID(long id) {
+        this.callRepository.deleteById(id);
     }
 
+    @Override
+    public Page<Call> findPaginated(int pageNumber, int pageSize) {
+        Pageable paging = PageRequest.of(pageNumber-1, pageSize);
+        return this.callRepository.findAll(paging);
+    }
+
+    private void setCallStatus(Call call){
+        call.setStatus("IN_CALL");
+        call.setStartTime(Instant.now());
+    }
+
+    private void endCallStatus(Call call){
+        call.setStatus("END_CALL");
+        call.setEndTime(Instant.now());
+    }
 }

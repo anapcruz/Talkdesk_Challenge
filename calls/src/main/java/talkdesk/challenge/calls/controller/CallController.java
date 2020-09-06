@@ -2,119 +2,84 @@ package talkdesk.challenge.calls.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import talkdesk.challenge.calls.model.ActualCall;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import talkdesk.challenge.calls.model.Call;
-import talkdesk.challenge.calls.repository.CallRepository;
-import talkdesk.challenge.calls.service.ICallService;
+import talkdesk.challenge.calls.service.CallService;
 
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
+import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class CallController {
 
-    private final CallRepository callRepository;
-    private final ICallService callService;
+    @Autowired
+    private CallService callService;
 
-    public CallController(CallRepository callRepository, ICallService callService) {
-        this.callRepository = callRepository;
-        this.callService = callService;
+    //display list of ongoing calls
+    @GetMapping("/")
+    public String viewHomePage(Model model){
+        //model.addAttribute("listCalls", callService.getAllOngoingCalls());
+        return findPaginated(1, model);
     }
 
-    /**
+    @GetMapping("/showNewCallForm")
+    public String showNewCallForm(Model model){
+        Call call = new Call();
+        model.addAttribute("call", call);
 
-    @PostMapping(value = "/create")
-    ResponseEntity<Call> createGroup(@RequestBody Call call) throws URISyntaxException {
-        callService.setCallStatus(call);
-        Call test = new Call(call.getCallerNumber(),call.getCalleeNumber(), call.getType());
-        Call result = callRepository.save(test);
-        return ResponseEntity.created(new URI("/create/" + result.getId()))
-                .body(result);
+        return "new_call";
     }
 
-
-    @GetMapping(value = "/calls")
-    Collection<Call> groups() {
-        return callRepository.findAll();
-    }
-    */
-
-    @GetMapping(value = "/")
-    public String retrieveActiveCalls(Model model){
-        List<Call> call = callRepository.findAll();
-        model.addAttribute("data", call);
-        return "index";
-    }
-
-    @PostMapping(value="/createCall")
-    public String createCall( Call calls){
-        //callService.createCalls(calls);
-        callRepository.save(calls);
+    @PostMapping("/saveCall")
+    public String saveCall( @Valid @ModelAttribute("call") Call call, BindingResult bindingResult){
+        if (bindingResult.hasErrors()) {
+            return "new_call";
+        }
+        // save call to database
+        callService.saveCall(call);
         return "redirect:/";
     }
 
-    @PutMapping(value = "/endCall/{id}")
-    public void finishCall(@PathVariable(value = "id") String id){
-        callService.endCall(id);
+    @GetMapping("/endCallById/{id}")
+    public String endCallById(@PathVariable(value = "id") long id){
+        //get call from the service
+        this.callService.endCallById(id);
+        return "redirect:/";
     }
 
-    @DeleteMapping(value = "/deleteCallByCaller/{callerID}")
-    public void deleteCallByCaller(@PathVariable(value = "callerID") String caller){
-        callRepository.deleteCallByCallerNumber(caller);
+    @GetMapping("/history")
+    public String viewHistoryPage(Model model){
+        model.addAttribute("listCalls", callService.getAllCalls());
+        return "history";
     }
 
-    @DeleteMapping(value = "/deleteCallByCallee/{calleeID}")
-    public void deleteCallByCallee(@PathVariable(value = "calleeID") String callee){
-        callRepository.deleteCallByCalleeNumber(callee);
+    @GetMapping("/deleteCallById/{id}")
+    public String deleteCallByID(@PathVariable(value = "id") long id){
+
+        //get call from the service
+        this.callService.deleteCallByID(id);
+        return "redirect:/history";
     }
 
-    @DeleteMapping(value = "/delete/{id}")
-    public void delete(@PathVariable(value = "id") long id){
-        callRepository.deleteById(id);
-    }
+    @GetMapping("/page/{pageNumber}")
+    public String findPaginated(@PathVariable(value = "pageNumber") int pageNumber, Model model){
+        int pageSize = 1;
 
-    @GetMapping(value = "/getAllCalls")
-    public ResponseEntity<Map<String, Object>> retrieveAllCalls(
-            @RequestParam(required = false) String type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "3") int size
-            ){
-        try {
-            List<Call> calls;
-            Pageable paging = PageRequest.of(page, size);
+        Page<Call> page = callService.findPaginated(pageNumber, pageSize);
+        List<Call> listCalls = page.getContent();
 
-            Page<Call> pageCalls;
-
-            if(type == null)
-                pageCalls = callRepository.findAll(paging);
-            else
-                pageCalls = callRepository.findByType(type, paging);
-
-            calls = pageCalls.getContent();
-
-            if(calls.isEmpty())
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("calls",  calls);
-            response.put("currentPage", pageCalls.getNumber());
-            response.put("totalItems", pageCalls.getTotalElements());
-            response.put("totalPages", pageCalls.getTotalPages());
-
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        model.addAttribute("currentPage", pageNumber);
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("totalItems", page.getTotalElements());
+        model.addAttribute("listCalls", listCalls);
+        model.addAttribute("page", page);
+        return "index";
     }
 
 }
