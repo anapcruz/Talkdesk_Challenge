@@ -5,15 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import talkdesk.challenge.calls.model.Call;
 import talkdesk.challenge.calls.service.CallService;
 
+import javax.annotation.security.PermitAll;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CallController {
@@ -21,11 +20,17 @@ public class CallController {
     @Autowired
     private CallService callService;
 
+    public static final int DEFAULT_PAGE_SIZE = 2;
+    private static final int[] PAGE_SIZES = {1, 3, 4, 5};
+    private static final String DEFAULT_TYPE = "ALL";
+
     //display list of ongoing calls
     @GetMapping("/")
-    public String viewHomePage(Model model){
+    public String viewHomePage(Model model,
+                               @RequestParam(value = "type",  defaultValue = DEFAULT_TYPE) String type,
+                               @RequestParam(value = "pageSize")  Optional<Integer> pageSize){
         //model.addAttribute("listCalls", callService.getAllOngoingCalls());
-        return findPaginated(1, model);
+        return findPaginated(1, pageSize, type, model);
     }
 
     @GetMapping("/showNewCallForm")
@@ -67,19 +72,27 @@ public class CallController {
         return "redirect:/history";
     }
 
-    @GetMapping("/page/{pageNumber}")
-    public String findPaginated(@PathVariable(value = "pageNumber") int pageNumber, Model model){
-        int pageSize = 1;
+    @GetMapping("/page/")
+    public String findPaginated(@RequestParam(value = "pageNumber") int pageNumber, Optional<Integer> pageSize, String type, Model model){
+        //
+        // Evaluate page size. If requested parameter is null, return initial
+        // page size
+        int evalPageSize = pageSize.orElse(DEFAULT_PAGE_SIZE);
+        Page<Call> page = callService.findPaginatedOngoingCall(pageNumber, evalPageSize,type);
 
-        Page<Call> page = callService.findPaginated(pageNumber, pageSize);
         List<Call> listCalls = page.getContent();
-
+        System.out.println(listCalls);
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
         model.addAttribute("listCalls", listCalls);
         model.addAttribute("page", page);
+        model.addAttribute("type", type);
+        model.addAttribute("selectedPageSize", evalPageSize);
+        model.addAttribute("pageSizes", PAGE_SIZES);
         return "index";
     }
+
+
 
 }

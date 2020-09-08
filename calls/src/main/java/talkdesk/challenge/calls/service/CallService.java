@@ -1,5 +1,6 @@
 package talkdesk.challenge.calls.service;
 
+import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,8 +9,12 @@ import org.springframework.stereotype.Service;
 import talkdesk.challenge.calls.model.Call;
 import talkdesk.challenge.calls.repository.CallRepository;
 
-import java.time.Instant;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.time.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -18,9 +23,14 @@ public class CallService implements CallInterface {
     @Autowired
     private CallRepository callRepository;
 
-    @Override
+    /*@Override
     public List<Call> getAllOngoingCalls() {
         return callRepository.findCallByStatus("IN_CALL");
+    }*/
+
+    @Override
+    public List<Call> getAllOngoingCalls() {
+        return null;
     }
 
     @Override
@@ -45,7 +55,6 @@ public class CallService implements CallInterface {
         for (Call c:  cal){
             if(c.getCallerNumber().equals(calls.getCallerNumber()) && c.getStatus().equals("IN_CALL"))
                 throw new IllegalArgumentException("Caller number " + calls.getCallerNumber() + " is in call!");
-
             else if(c.getCalleeNumber().equals(calls.getCalleeNumber()) && c.getStatus().equals("IN_CALL"))
                 throw new IllegalArgumentException("Callee number " + calls.getCalleeNumber() + " is in call!");
         }
@@ -61,7 +70,7 @@ public class CallService implements CallInterface {
         if(optional.isPresent()){
             call = optional.get();
         }else{
-            throw  new RuntimeException("Call id not found for id :: " + id);
+            throw new RuntimeException("Call id not found for id :: " + id);
         }
 
         endCallStatus(call);
@@ -74,9 +83,41 @@ public class CallService implements CallInterface {
     }
 
     @Override
-    public Page<Call> findPaginated(int pageNumber, int pageSize) {
+    public Page<Call> findPaginatedOngoingCall(int pageNumber, int pageSize, String type) {
         Pageable paging = PageRequest.of(pageNumber-1, pageSize);
-        return this.callRepository.findAll(paging);
+        System.out.println("type " + type);
+        if (type.equals("ALL")) {
+            return this.callRepository.findCallsByStatus("IN_CALL", paging);
+        }
+        return this.callRepository.findAllByStatusAndType("IN_CALL", type, paging);
+    }
+
+    @Override
+    public Map<Integer, String> getDurationCallByType(String type) {
+        List<Call> calls = callRepository.findCallsByType(type);
+        Map<Integer, Long> mapStatDuration = new HashMap<>();
+
+
+
+        for(Call c: calls){
+            Instant start = c.getStartTime();
+            Instant end = c.getEndTime();
+
+            Duration diffCallTime = Duration.between(end, start);
+            long callDuration = diffCallTime.toMinutes();
+
+
+            LocalDateTime startTime = LocalDateTime.ofInstant(c.getStartTime(), ZoneId.systemDefault());
+            int day = startTime.getDayOfMonth();
+
+            mapStatDuration.put(day, callDuration);
+        }
+
+
+
+
+
+        return null;
     }
 
     private void setCallStatus(Call call){
@@ -88,4 +129,13 @@ public class CallService implements CallInterface {
         call.setStatus("END_CALL");
         call.setEndTime(Instant.now());
     }
+
+    private double calculateDuration(List<Call> calls){
+        double totalDuration = 0;
+
+
+
+        return totalDuration;
+    }
+
 }
