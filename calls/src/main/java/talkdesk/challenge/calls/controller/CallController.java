@@ -7,21 +7,24 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import talkdesk.challenge.calls.model.Call;
+import talkdesk.challenge.calls.service.CallInterface;
 import talkdesk.challenge.calls.service.CallService;
 
 import javax.annotation.security.PermitAll;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
 public class CallController {
 
     @Autowired
-    private CallService callService;
+    private CallInterface callService;
 
-    public static final int DEFAULT_PAGE_SIZE = 2;
-    private static final int[] PAGE_SIZES = {1, 3, 4, 5};
+    public static final int DEFAULT_PAGE_SIZE = 5;
+    private static final int[] PAGE_SIZES = {5, 10, 15, 20};
     private static final String DEFAULT_TYPE = "ALL";
 
     //display list of ongoing calls
@@ -81,7 +84,6 @@ public class CallController {
         Page<Call> page = callService.findPaginatedOngoingCall(pageNumber, evalPageSize,type);
 
         List<Call> listCalls = page.getContent();
-        System.out.println(listCalls);
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("totalItems", page.getTotalElements());
@@ -94,5 +96,26 @@ public class CallController {
     }
 
 
+    @GetMapping("/statistics")
+    public String statisticsPage(String type, Model model){
+
+        Map<String, String> mapCallDurationInbound = callService.getDurationCallByType("INBOUND");
+        Map<String, String> mapCallDurationOutbound = callService.getDurationCallByType("OUTBOUND");
+
+        long totalCalls = callService.getTotalNumberOfCalls();
+        Map<String, Map<String, Long>> totalCallsByCallerNumber = callService.getTotalCallsByCallerNumber("Caller");
+        Map<String, Map<String, Long>> totalCallsByCalleeNumber = callService.getTotalCallsByCallerNumber("Callee");
+
+
+
+        model.addAttribute("callDurationInbound", mapCallDurationInbound);
+        model.addAttribute("callDurationOutbound", mapCallDurationOutbound);
+        model.addAttribute("totalNumber", totalCalls);
+        model.addAttribute("callsByCallerDate", totalCallsByCallerNumber);
+        model.addAttribute("callsByCalleeDate", totalCallsByCalleeNumber);
+
+
+        return "statistics";
+    }
 
 }

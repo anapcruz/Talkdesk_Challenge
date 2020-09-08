@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistics Calls</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container">
+    <div th:replace="fragments :: menu"></div>
+
+    <h1 style="padding-top: 10px; padding-bottom: 10px; text-align: center">Statistics</h1>
+
+    <div>
+        <h4>Total call duration</h4>
+
+        <div class="card-block col-md-6" style="float: left">
+            <h5>by Inbound type</h5>
+            <table class="table table-hover center">
+                <thead>
+                <tr>
+                    <th>Call day</th>
+                    <th>Call duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="call : ${callDurationInbound}">
+                    <td th:text="${call.getKey()}"></td>
+                    <td th:text="${call.getValue()}"></td>
+                </tr>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-block col-md-6" style="float: right">
+            <h5>by Outbound type</h5>
+            <table class="table table-hover center">
+                <thead>
+                <tr>
+                    <th>Call day</th>
+                    <th>Call duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="call : ${callDurationOutbound}">
+                    <td th:text="${call.getKey()}"></td>
+                    <td th:text="${call.getValue()}"></td>
+                </tr>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <br/>
+    <div class="container row" style="padding-top: 10px;">
+        <div>
+            <td><label><h4>Total calls number: </h4></label></td>
+            <td th:text="${totalNumber}"></td>
+        </div>
+    </div>
+
+    <div style="padding-top: 10px;">
+        <h4>Number of calls</h4>
+
+        <div class="card-block col-sm-6" style="float: left">
+            <h5>by caller number</h5>
+            <table class="table table-hover center">
+                <thead>
+                <tr>
+                    <th>Call day</th>
+                    <th>Caller number</th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <span th:each="callDay: ${callsByCallerDate}">
+                    <tr th:each="callerInfo :  ${callDay.getValue()}">
+                        <td th:text="${callDay.getKey()}"></td>
+                        <td th:text="${callerInfo.getKey()}"></td>
+                        <td th:text="${callerInfo.getValue()}"></td>
+                    </tr>
+                </span>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-block col-sm-6" style="float: right">
+            <h5>by callee number</h5>
+            <table class="table table-hover center">
+                <thead>
+                <tr>
+                    <th>Call day</th>
+                    <th>Callee number</th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <span th:each="callDay: ${callsByCalleeDate}">
+                    <tr th:each="calleeInfo :  ${callDay.getValue()}">
+                        <td th:text="${callDay.getKey()}"></td>
+                        <td th:text="${calleeInfo.getKey()}"></td>
+                        <td th:text="${calleeInfo.getValue()}"></td>
+                    </tr>
+                </span>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

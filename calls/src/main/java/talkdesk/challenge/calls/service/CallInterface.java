@@ -14,5 +14,8 @@ public interface CallInterface {
     void endCallById(long id);
     void deleteCallByID(long id);
     Page<Call> findPaginatedOngoingCall(int pageNumber, int pageSize, String type);
-    Map<Integer, String> getDurationCallByType(String type);
+    Map<String, String> getDurationCallByType(String type);
+    Long getTotalNumberOfCalls();
+    Map<String, Map<String, Long>> getTotalCallsByCallerNumber(String CallerOrCallee);
+    Long getTotalCallsByCalleeNumber(String calleeNumber);
 }

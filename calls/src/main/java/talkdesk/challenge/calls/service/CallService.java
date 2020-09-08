@@ -11,17 +11,19 @@ import talkdesk.challenge.calls.repository.CallRepository;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CallService implements CallInterface {
 
     @Autowired
     private CallRepository callRepository;
+
 
     /*@Override
     public List<Call> getAllOngoingCalls() {
@@ -85,7 +87,6 @@ public class CallService implements CallInterface {
     @Override
     public Page<Call> findPaginatedOngoingCall(int pageNumber, int pageSize, String type) {
         Pageable paging = PageRequest.of(pageNumber-1, pageSize);
-        System.out.println("type " + type);
         if (type.equals("ALL")) {
             return this.callRepository.findCallsByStatus("IN_CALL", paging);
         }
@@ -93,49 +94,88 @@ public class CallService implements CallInterface {
     }
 
     @Override
-    public Map<Integer, String> getDurationCallByType(String type) {
-        List<Call> calls = callRepository.findCallsByType(type);
-        Map<Integer, Long> mapStatDuration = new HashMap<>();
-
-
+    public Map<String, String> getDurationCallByType(String type) {
+        List<Call> calls = callRepository.findCallsByTypeAndStatus(type, "END_CALL");
+        Map<String, Long> mapStatDuration = new HashMap<>();
+        Map<String, String> mapDurationCall = new HashMap<>();
 
         for(Call c: calls){
-            Instant start = c.getStartTime();
-            Instant end = c.getEndTime();
+            //duration call time
+            long duration = c.getEndTime().getTime() - c.getStartTime().getTime();
 
-            Duration diffCallTime = Duration.between(end, start);
-            long callDuration = diffCallTime.toMinutes();
+            String date = getDate(c.getStartTime());
 
-
-            LocalDateTime startTime = LocalDateTime.ofInstant(c.getStartTime(), ZoneId.systemDefault());
-            int day = startTime.getDayOfMonth();
-
-            mapStatDuration.put(day, callDuration);
+            if(!mapStatDuration.containsKey(date))
+                mapStatDuration.put(date,duration);
+            mapStatDuration.put(date, mapStatDuration.get(date)+duration);
         }
 
+        //Format time
+        for (Map.Entry<String, Long> entry : mapStatDuration.entrySet()) {
+            mapDurationCall.put(entry.getKey(),timeToString(entry.getValue()));
+        }
 
-
-
-
-        return null;
+        return mapDurationCall;
     }
+
+    @Override
+    public Long getTotalNumberOfCalls() {
+        return callRepository.count();
+    }
+
+    @Override
+    public Map<String, Map<String, Long>> getTotalCallsByCallerNumber(String CallerOrCallee) {
+        List<Call> calls = callRepository.findAll();
+        Map<String, Map<String, Long>> mapCallsByCaller = new HashMap<>();
+
+        Map<String, Long> mapCalls = new HashMap<>();
+
+        if(CallerOrCallee.equals("Caller"))
+            calls.stream().map(Call::getCallerNumber).forEach(callerNb -> mapCalls.put(callerNb, mapCalls.getOrDefault(callerNb, (long) 0) + 1));
+        else if(CallerOrCallee.equals("Callee"))
+            calls.stream().map(Call::getCalleeNumber).forEach(calleeNb -> mapCalls.put(calleeNb, mapCalls.getOrDefault(calleeNb, (long) 0) + 1));
+
+        calls.stream().map(Call::getStartTime).forEach(callDate -> {
+            String date = getDate(callDate);
+            mapCallsByCaller.put(date, mapCalls);
+        });
+
+        return mapCallsByCaller;
+    }
+
+    @Override
+    public Long getTotalCallsByCalleeNumber(String calleeNumber) {
+        return callRepository.countCallsByCalleeNumber(calleeNumber);
+    }
+
 
     private void setCallStatus(Call call){
         call.setStatus("IN_CALL");
-        call.setStartTime(Instant.now());
+        call.setStartTime(new Timestamp(System.currentTimeMillis()));
     }
 
     private void endCallStatus(Call call){
         call.setStatus("END_CALL");
-        call.setEndTime(Instant.now());
+        call.setEndTime(new Timestamp(System.currentTimeMillis()));
     }
 
-    private double calculateDuration(List<Call> calls){
-        double totalDuration = 0;
+    private String getDate(Timestamp time){
+        Calendar cal = Calendar.getInstance();
 
+        cal.setTimeInMillis(time.getTime());
 
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        int month = cal.get(Calendar.MONTH);
+        int year = cal.get(Calendar.YEAR);
 
-        return totalDuration;
+        return String.format("%s-%s-%s",day, month, year);
+    }
+
+    private String timeToString(long time){
+        return String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(time),
+                TimeUnit.MILLISECONDS.toMinutes(time),
+                TimeUnit.MILLISECONDS.toSeconds(time));
     }
 
 }

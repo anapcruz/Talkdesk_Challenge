@@ -2,8 +2,7 @@ package talkdesk.challenge.calls.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "CALL")
@@ -30,12 +29,12 @@ public class Call {
     /**
      * start timestamp of the call
      */
-    private Instant startTime;
+    private Timestamp startTime;
 
     /**
      * end timestamp of the call
      */
-    private Instant endTime;
+    private Timestamp endTime;
 
     /**
      * type of the call
@@ -68,19 +67,19 @@ public class Call {
         this.calleeNumber = calleeNumber;
     }
 
-    public Instant getStartTime() {
+    public Timestamp getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Instant startTime) {
+    public void setStartTime(Timestamp startTime) {
         this.startTime = startTime;
     }
 
-    public Instant getEndTime() {
+    public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Instant endTime) {
+    public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
     }
 
