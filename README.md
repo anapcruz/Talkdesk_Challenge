@@ -63,6 +63,11 @@ An entire application can be run with a single command in a terminal:
 $ docker-compose up
 ```
 
+Open client window:
+```sh
+$ http://localhost:8080/
+```
+
 If you want to stop it use the following command:
 ```sh
 $ docker-compose down
