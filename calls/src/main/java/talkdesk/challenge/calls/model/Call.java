@@ -67,11 +67,27 @@ public class Call {
     }
 
     /**
+     * Updates caller number
+     * @param callerNumber caller number
+     */
+    public void setCallerNumber(String callerNumber) {
+        this.callerNumber = callerNumber;
+    }
+
+    /**
      * Returns the phone number of the callee
      * @return phone number of the callee
      */
     public String getCalleeNumber() {
         return calleeNumber;
+    }
+
+    /**
+     * Updates callee number
+     * @param calleeNumber callee number
+     */
+    public void setCalleeNumber(String calleeNumber) {
+        this.calleeNumber = calleeNumber;
     }
 
     /**

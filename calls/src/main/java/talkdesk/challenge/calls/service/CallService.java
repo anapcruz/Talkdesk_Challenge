@@ -120,11 +120,13 @@ public class CallService implements CallInterface {
             String date = getDate(c.getStartTime());
 
             //check if the date exists in the map
-            if(!mapStatDuration.containsKey(date))
+            if(!mapStatDuration.containsKey(date)){
                 //add the date and the call duration
                 mapStatDuration.put(date,duration);
-            //assign to the existing key (date), an increase of the call duration
-            mapStatDuration.put(date, mapStatDuration.get(date)+duration);
+            }else{
+                //assign to the existing key (date), an increase of the call duration
+                mapStatDuration.put(date, mapStatDuration.get(date)+duration);
+            }
         }
 
         //Format time to visualize the correct total call duration
@@ -162,20 +164,26 @@ public class CallService implements CallInterface {
         Map<String, Long> mapCalls = new HashMap<>();
 
         //check the received string
-        if(CallerOrCallee.equals("Caller"))
+        if(CallerOrCallee.equals("Caller")){
             //stores the caller number and its occurrences
             calls.stream().map(Call::getCallerNumber).forEach(callerNb -> mapCalls.put(callerNb, mapCalls.getOrDefault(callerNb, (long) 0) + 1));
-        else if(CallerOrCallee.equals("Callee"))
+            calls.stream().map(Call::getStartTime).forEach(callDate -> {
+                //get the date of the call
+                String date = getDate(callDate);
+                //assign the date, the caller/callee number and its occurrences, previously saved
+                mapCallsByCaller.put(date, mapCalls);
+            });
+        }
+        else if(CallerOrCallee.equals("Callee")){
             //stores the callee number and its occurrences
             calls.stream().map(Call::getCalleeNumber).forEach(calleeNb -> mapCalls.put(calleeNb, mapCalls.getOrDefault(calleeNb, (long) 0) + 1));
-
-
-        calls.stream().map(Call::getStartTime).forEach(callDate -> {
-            //get the date of the call
-            String date = getDate(callDate);
-            //assign the date, the caller/callee number and its occurrences, previously saved
-            mapCallsByCaller.put(date, mapCalls);
-        });
+            calls.stream().map(Call::getStartTime).forEach(callDate -> {
+                //get the date of the call
+                String date = getDate(callDate);
+                //assign the date, the caller/callee number and its occurrences, previously saved
+                mapCallsByCaller.put(date, mapCalls);
+            });
+        }
 
         return mapCallsByCaller;
     }
@@ -260,8 +268,8 @@ public class CallService implements CallInterface {
     private String timeToString(long time){
         return String.format("%02d:%02d:%02d",
                 TimeUnit.MILLISECONDS.toHours(time),
-                TimeUnit.MILLISECONDS.toMinutes(time),
-                TimeUnit.MILLISECONDS.toSeconds(time));
+                TimeUnit.MILLISECONDS.toMinutes(time) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(time) % TimeUnit.MINUTES.toSeconds(1));
     }
 
 }
