@@ -108,6 +108,32 @@
             </table>
         </div>
     </div>
+    <br/>
+    <div style="padding-top: 10px;">
+        <h4>Total cost of outbound calls</h4>
+        <div class="container row" style="padding-top: 10px;">
+            <div class="card-block col-md-6" style="float: left">
+                <table class="table table-hover center">
+                    <thead>
+                    <tr>
+                        <th>Call day</th>
+                        <th>Total cost</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="call : ${totalCost}">
+                        <td th:text="${call.getKey()}"></td>
+                        <td th:text="${call.getValue()}"></td>
+                    </tr>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="padding-top: 15px">
+        <td><label><h4>Inbound calls are free!</h4></label></td>
+    </div>
 </div>
 </body>
 </html>

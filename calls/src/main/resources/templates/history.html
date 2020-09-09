@@ -11,9 +11,18 @@
 <div class="container">
     <div th:replace="fragments :: menu"></div>
 
-    <h1>Calls List</h1>
+    <h1 style="padding-top: 10px; padding-bottom: 10px; text-align: center">History calls list</h1>
 
     <div class="card-block col-sm-12">
+        <form th:action="@{/history}" method="get">
+            <label class="col-form-label">Filtering:</label>
+            <select  name="type">
+                <option th:value="ALL" th:text="All"></option>
+                <option th:value="INBOUND" th:text="Inbound"></option>
+                <option th:value="OUTBOUND" th:text="Outbound"></option>
+            </select>
+            <button type="submit">Go</button>
+        </form>
         <table class="table table-hover">
             <thead>
             <tr>
@@ -41,7 +50,66 @@
             </tr>
             </tbody>
         </table>
+        <div class="row">
+            <div class="row  form-group col-md-1">
+                <select class="form-control pagination" id="pageSizeSelect" th:action="@{/history}" th:method="get">
+                    <option  name="pageSize" th:each="pageSize : ${pageSizes}" th:text="${pageSize}"
+                             th:value="${pageSize}"
+                             th:selected="${pageSize} == ${selectedPageSize}">
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div th:if="${totalPages > 1}">
+            <div class="row col-sm-10">
+                <div class="col-sm-2">
+                    Total Rows: [[${totalItems}]]
+                </div>
+                <div class="col-sm-1">
+                     <span>
+                        <a th:href="@{'/pagehist/'(pageNumber=${1},pageSize=${selectedPageSize},type=${type})}">First</a>
+                   </span>
+                </div>
+                <div class="col-sm-2">
+                   <span th:if="${page.hasPrevious()}">
+                        <a th:href="@{'/pagehist/'(pageNumber=${currentPage-1},pageSize=${selectedPageSize},type=${type})}">Previous</a>
+                   </span>
+                </div>
+                <th:block>
+                    <span th:each="i: ${#numbers.sequence(1, totalPages)}">
+                        <a th:if="${currentPage != i}" th:href="@{'/pagehist/'(pageNumber=${i},pageSize=${selectedPageSize},type=${type})}">[[${i}]]</a>
+                        <span th:unless="${currentPage != i}">[[${i}]]</span>&nbsp; &nbsp;
+                    </span>
+                </th:block>
+                <div class="col-sm-1">
+                    <a th:if="${currentPage < totalPages}" th:href="@{'/pagehist/'(pageNumber=${currentPage + 1},pageSize=${selectedPageSize},type=${type})}">Next</a>
+                    <span th:unless="${currentPage < totalPages}">Next</span>
+                </div>
+
+                <div class="col-sm-1">
+                    <a th:if="${currentPage < totalPages}" th:href="@{'/pagehist/'(pageNumber=${totalPages},pageSize=${selectedPageSize},type=${type})}">Last</a>
+                    <span th:unless="${currentPage < totalPages}">Last</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+<script
+        src="https://code.jquery.com/jquery-1.11.1.min.js"
+        integrity="sha256-VAvG3sHdS5LqTT+5A/aeq/bZGa/Uj04xKxY8KM/w9EE="
+        crossorigin="anonymous"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function() {
+        changePageAndSize();
+    });
+    function changePageAndSize() {
+        $('#pageSizeSelect').change(function(evt) {
+            window.location.replace("/history/?pageSize=" + this.value);
+        });
+    }
+    /*]]>*/
+</script>
 </body>
 </html>
