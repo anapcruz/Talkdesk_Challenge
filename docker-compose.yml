@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  calls:
+    build: ./calls
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresdb
+
+  postgresdb:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=test
+      - POSTGRES_DB=test
+    restart: always

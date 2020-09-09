@@ -195,8 +195,8 @@ public class CallController {
         Map<String, String> mapCallDurationOutbound = callService.getDurationCallByType("OUTBOUND");
 
         long totalCalls = callService.getTotalNumberOfCalls();
-        Map<String, Map<String, Long>> totalCallsByCallerNumber = callService.getTotalCallsByCallerOrCalleeNumber("Caller");
-        Map<String, Map<String, Long>> totalCallsByCalleeNumber = callService.getTotalCallsByCallerOrCalleeNumber("Callee");
+        Map<String, Map<String, Long>> totalCallsByCallerNumber = callService.getTotalCallsByCallerNumber();
+        Map<String, Map<String, Long>> totalCallsByCalleeNumber = callService.getTotalCallsByCalleeNumber();
         Map<String, Double> totalCostByOutbound = callService.getTotalCostByType();
 
         model.addAttribute("callDurationInbound", mapCallDurationInbound);

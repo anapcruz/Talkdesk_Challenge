@@ -50,12 +50,18 @@ public interface CallInterface {
     Long getTotalNumberOfCalls();
 
     /**
-     * Get the number of calls by the caller or callee number.
-     * @param CallerOrCallee caller or caller number
-     * @return map of maps, i.e., the key is the date of the call and assigned it there is the caller or
-     * the caller number and the related occurrences
+     * Returns a hashmap of caller number
+     * @return map of maps, i.e., the key is the date of the call and assigned it there is the caller
+     * number and the related occurrences
      */
-    Map<String, Map<String, Long>> getTotalCallsByCallerOrCalleeNumber(String CallerOrCallee);
+    Map<String, Map<String, Long>> getTotalCallsByCallerNumber();
+
+    /**
+     * Returns a hashmap of callee number
+     * @return map of maps, i.e., the key is the date of the call and assigned it there is the callee
+     * number and the related occurrences
+     */
+    Map<String, Map<String, Long>> getTotalCallsByCalleeNumber();
 
     /**
      * Get total call cost by type.

@@ -147,45 +147,87 @@ public class CallService implements CallInterface {
     }
 
     /**
-     * Get the number of calls by the caller or callee number.
-     * @param CallerOrCallee caller or caller number
-     * @return map of maps, i.e., the key is the date of the call and assigned it there is the caller or
-     * the caller number and the related occurrences
+     * Returns a hashmap of caller number
+     * @return map of maps, i.e., the key is the date of the call and assigned it there is the caller
+     * number and the related occurrences
      */
     @Override
-    public Map<String, Map<String, Long>> getTotalCallsByCallerOrCalleeNumber(String CallerOrCallee) {
+    public Map<String, Map<String, Long>> getTotalCallsByCallerNumber() {
         //list of all calls
-        List<Call> calls = callRepository.findAll();
+        List<Call> calls = callRepository.findCallsByStatus("ENDED_CALL");
 
-        //map that will be stored the date of the call, and the caller or callee number and the number of occurrences
+        //map that will be stored the date of the call, and the caller number and the number of occurrences
         Map<String, Map<String, Long>> mapCallsByCaller = new HashMap<>();
 
-        //map that will be stored the caller or callee number and the number of occurrences
-        Map<String, Long> mapCalls = new HashMap<>();
+        //map that will be stored the caller number and the number of occurrences
+        Map<String, Long> mapCalls;
 
-        //check the received string
-        if(CallerOrCallee.equals("Caller")){
-            //stores the caller number and its occurrences
-            calls.stream().map(Call::getCallerNumber).forEach(callerNb -> mapCalls.put(callerNb, mapCalls.getOrDefault(callerNb, (long) 0) + 1));
-            calls.stream().map(Call::getStartTime).forEach(callDate -> {
-                //get the date of the call
-                String date = getDate(callDate);
-                //assign the date, the caller/callee number and its occurrences, previously saved
-                mapCallsByCaller.put(date, mapCalls);
-            });
-        }
-        else if(CallerOrCallee.equals("Callee")){
-            //stores the callee number and its occurrences
-            calls.stream().map(Call::getCalleeNumber).forEach(calleeNb -> mapCalls.put(calleeNb, mapCalls.getOrDefault(calleeNb, (long) 0) + 1));
-            calls.stream().map(Call::getStartTime).forEach(callDate -> {
-                //get the date of the call
-                String date = getDate(callDate);
-                //assign the date, the caller/callee number and its occurrences, previously saved
-                mapCallsByCaller.put(date, mapCalls);
-            });
+        for(Call c: calls){
+            //callee number
+            String caller = c.getCallerNumber();
+            //call date
+            String date = getDate(c.getStartTime());
+
+            //check if the key (date) already exists
+            // if not create a new hashmap for this date
+            if(!mapCallsByCaller.containsKey(date)){
+                Map<String, Long> mapCalls2 = new HashMap<>();
+                mapCallsByCaller.put(date, mapCalls2);
+            }
+
+            //get the date for the map
+            mapCalls = mapCallsByCaller.get(date);
+
+            //check if callee number exists
+            if(!mapCalls.containsKey(caller)){
+                mapCalls.put(caller, (long) 1);
+            }else{
+                mapCalls.put(caller, mapCalls.get(caller) + 1);
+            }
         }
 
         return mapCallsByCaller;
+    }
+
+    /**
+     * Returns a hashmap of callee number
+     * @return map of maps, i.e., the key is the date of the call and assigned it there is the callee
+     * number and the related occurrences
+     */
+    @Override
+    public Map<String, Map<String, Long>> getTotalCallsByCalleeNumber() {
+        //list of calls
+        List<Call> calls = callRepository.findCallsByStatus("ENDED_CALL");
+        //map that will be stored the date of the call, and the callee number and the number of occurrences
+        Map<String, Map<String, Long>> mapCallsByCallee = new HashMap<>();
+        //map that will be stored the callee number and the number of occurrences
+        Map<String, Long> mapCalls;
+
+        for(Call c: calls){
+            //callee number
+            String callee = c.getCalleeNumber();
+            //caller date
+            String date = getDate(c.getStartTime());
+
+            //check if the key (date) already exists
+            // if not create a new hashmap for this date
+            if(!mapCallsByCallee.containsKey(date)){
+                Map<String, Long> mapCalls2 = new HashMap<>();
+                mapCallsByCallee.put(date, mapCalls2);
+            }
+
+            //get the date for the map
+            mapCalls = mapCallsByCallee.get(date);
+
+            //check if callee number exists
+            if(!mapCalls.containsKey(callee)){
+                mapCalls.put(callee, (long) 1);
+            }else{
+                mapCalls.put(callee, mapCalls.get(callee) + 1);
+            }
+        }
+
+        return mapCallsByCallee;
     }
 
     /**

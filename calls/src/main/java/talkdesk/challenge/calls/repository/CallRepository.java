@@ -35,4 +35,11 @@ public interface CallRepository extends JpaRepository<Call, Long> {
      */
     List<Call> findCallsByTypeAndStatus(String type, String status);
 
+    /**
+     * Returns a list of all calls filtering by status
+     * @param status call status
+     * @return list of calls
+     */
+    List<Call> findCallsByStatus(String status);
+
 }
